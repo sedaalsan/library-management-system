@@ -1,73 +1,65 @@
 # library-management-system
-file1 = open("books.txt","a+",encoding="utf-8")
-read1 = file1.read()
-print(read1)
-
 class Library:
-    bookslist = {}
-    def __init__(self):
-        while True:
-            print("***MENU***")
-            print("""
-        1)List Books
-        2)Add Book
-        3)Remove Book
-        q)Quit""")
-            choice=int(input("Enter your choice (1-4): "))
-            if (choice==1):
-                self.listbook()
-            elif (choice==2):
-                self.bookadd()
-            elif (choice==3):
-                self.removebook()
-            #elif (choice == q):
-                #choice=str(choice)
-                #self.cikis()
-            else:
-                print("Invalid input. Please try again.")
-                continue
-    def bookadd(self):
-        self.bookname=input("Enter the book title: ")
-        self.bookauthor=input("Enter the author: ")
-        self.bookyear=input("Enter the release year: ")
-        self.bookpage=input("Enter the number of pages: ")
-        self.bookslist[self.bookname]={
-            "bookname":self.bookname,
-            "bookauthor":self.bookauthor,
-            "bookyear":self.bookyear,
-            "bookpage":self.bookpage,
-        }
-        print("Information was recorded.")
+    def __init__(self, file1):
+        self.file1 = file1
+        try:
+            self.file = open(self.file1, "a+")
+        except FileNotFoundError:
+            import os
+            os.makedirs(os.path.dirname(self.file1), exist_ok=True)
+            self.file = open(self.file1, "a+")
 
-    def listbook(self):
-        if(self.bookslist=={}):
-            print("The book information not found")
-        else:
-            for book in self.bookslist:
-                print(book,self.bookslist[book])
-    def removebook(self):
-        book_name = input("Enter the book name: ")
-        books = self.file.readlines()
-        new_books = []
-        removed = False
-        for book in books:
-            bookslist = book.split(",")
-            if book_name == bookslist[0]:
-                removed = True
-            else:
-                new_books.append(book)
-            if not removed:
-              self.file.seek(0)
-              self.file.truncate()
-              self.file.close()
-              file2 = open("temp.txt", "a", encoding="utf-8")
-              for book in new_books:
-                file2.write(book)
-                print(f"{book_name} removed")
+    def __del__(self):
+        self.file.close()
+while True:
+    print("*** MENU ***")
+    print("1) List Books")
+    print("2) Add Book")
+    print("3) Remove Book")
+    print("q) Quit")
 
-            else:
-                print(f"{book_name} not found.") 
-        #def cikis(self):
-            #print("Program has been closed.")
-            #exit(0)
-lib=Library()
+    choice = input("Enter your choice: ")
+    if choice == "1":
+        lib.list_books()
+    elif choice == "2":
+        lib.add_book()
+    elif choice == "3":
+        lib.remove_book()
+    elif choice.lower() == "q":
+        break
+    else:
+        print("Invalid choice!")
+    def list_books(self):
+            self.file.seek(0)  
+            lines = self.file.read().splitlines()  
+            for line in lines:
+                book_info = line.split(",")
+                book_name = book_info[0]
+                author = book_info[1]
+                print(f"{book_name}, {author}")
+
+    def add_book(self):
+            book_title = input("Enter book title: ")
+            book_author = input("Enter book author: ")
+            release_year = input("Enter release year: ")
+            number_pages = input("Enter number of pages: ")
+
+            book_info = f"{book_title},{book_author},{release_year},{number_pages}\n"
+            self.file.write(book_info)
+            print("Book has been added successfully!")
+
+    def remove_book(self):
+            title_to_remove = input("Enter the title of the book to remove: ")
+            self.file.seek(0)  
+            lines = self.file.readlines()  
+
+            updated_lines = [line for line in lines if not line.startswith(title_to_remove)]
+
+            self.file.seek(0)
+            self.file.truncate()
+
+            self.file.writelines(updated_lines)
+            print("Book has been removed successfully!")
+
+
+lib = Library("books.txt")
